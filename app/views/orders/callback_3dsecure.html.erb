@@ -1,0 +1,19 @@
+<SCRIPT LANGUAGE="Javascript"> function OnLoadEvent() { document.form.submit(); }</SCRIPT>
+<HTML>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>3D-Secure Redirect</title>
+</head>
+
+<body OnLoad="OnLoadEvent();">
+<form name="form" action="<%= @callback %>" method="POST" target="_top">
+  <input type="hidden" name="PaRes"  value="<%= params['PaRes'] %>"/>
+  <input type="hidden" name="MD"     value="<%= params['MD'] %>"/>
+  <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>"/>
+  <NOSCRIPT>
+  <center><p>Please click button below to Authorise your card</p><input type="submit" value="Go"/></p></center>
+  </NOSCRIPT>
+</form>
+</body>
+</html>
+

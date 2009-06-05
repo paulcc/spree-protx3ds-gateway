@@ -1,0 +1,22 @@
+<h2>3D-Secure Authentication with your Bank</h2>
+
+<p> To increase the security of Internet transactions, Visa and Mastercard have introduced 3D-Secure (like an online version of Chip and PIN). 
+<br/>
+<br/>
+You have chosen to use a card that is part of the 3D-Secure scheme, so you will need to authenticate yourself with your bank in the section below.
+</p>
+
+<div align="center">
+<div align="center" style="width: 500px">
+  <img src="/images/vbv_logo_small.gif" alt="Verified by Visa">
+  <img src="/images/mcsc_logo.gif" alt="MasterCard SecureCode">
+  <br/>
+
+  <iframe src="/orders/<%= @order.number %>/secure_form" width="450" height="450" frameborder="0" scrolling="no" >
+    <div align="center">
+      <% session["3Dform"] %>
+    </div>
+  </iframe>
+</div>
+</div>
+
