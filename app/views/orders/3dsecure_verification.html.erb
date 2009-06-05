@@ -12,11 +12,24 @@ You have chosen to use a card that is part of the 3D-Secure scheme, so you will 
   <img src="/images/mcsc_logo.gif" alt="MasterCard SecureCode">
   <br/>
 
-  <iframe src="/orders/<%= @order.number %>/secure_form" width="450" height="450" frameborder="0" scrolling="no" >
-    <div align="center">
-      <% session["3Dform"] %>
-    </div>
+  <iframe id="3ds" width="450" height="450" frameborder="0" scrolling="no" title="Authentication with your bank will happen in this frame">
+    Should be replaced
   </iframe>
 </div>
 </div>
+
+<div id="the_form">
+  <div align="center">
+    <%= @form %>
+  </div>
+</div>
+
+<% content_for :head %>
+  <script type="text/javascript">
+  $('iframe#3ds').ready(function() {
+    $('body', $('iframe#3ds').contents()).html($('#the_form').html());
+    $('#the_form').hide();
+  });
+  </script>
+<% end %>
 
