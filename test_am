@@ -1,0 +1,38 @@
+
+# force pickup of edge protx gw
+require "./vendor/extensions/protx3ds_gateway/lib/active_merchant/billing/gateways/protx.rb"
+
+# and the 3ds extension of it
+require "./vendor/extensions/protx3ds_gateway/lib/active_merchant/billing/gateways/protx3ds.rb"
+
+# put in test mode
+ActiveMerchant::Billing::Base.gateway_mode = :test
+# ActiveMerchant::Billing::Protx3dsGateway.simulate = true
+
+
+
+gw = ActiveMerchant::Billing::Protx3dsGateway.new :login => File.read("which_vendor").chomp
+
+
+# data setup
+
+test_visa = "4929000000006"
+
+address = Address.new "city"=>"a", "address1"=>"a", "address2"=>"a", "zipcode"=>"a", "country_id"=>213, "state_name"=>nil, "lastname"=>"a", "id"=>109, "phone"=>"a", "firstname"=>"a", "state_id"=>1
+
+order = Order.new :ship_address => address
+
+card = Creditcard.new :number => test_visa, :cc_type => "visa", :verification_value => "123", :month => 3, :year => 2010, :address => address, :order => order
+
+opts = { :order_id => "1234",
+       }
+
+
+# an authorization
+out = gw.authorize(100, card, card.gateway_options(opts))
+
+puts out.inspect
+
+
+## try a purchase too... (later)
+

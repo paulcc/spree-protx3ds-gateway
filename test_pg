@@ -1,0 +1,69 @@
+
+# force pickup of edge protx gw
+require "./vendor/extensions/protx3ds_gateway/lib/active_merchant/billing/gateways/protx.rb"
+
+# and the 3ds extension of it
+require "./vendor/extensions/protx3ds_gateway/lib/active_merchant/billing/gateways/protx3ds.rb"
+
+include Spree::PaymentGatewayForProtx3ds
+
+
+################################################################################
+# gateway setup
+
+# put in test mode
+
+Spree::Gateway::Config.set(:use_bogus => false)
+ActiveMerchant::Billing::Base.gateway_mode = :test
+# ActiveMerchant::Billing::Protx3dsGateway.simulate = true
+
+
+Gateway.destroy_all
+GatewayConfiguration.destroy_all
+
+protx = Gateway.create( :clazz => 'ActiveMerchant::Billing::Protx3dsGateway',
+                        :name => 'Protx3ds',
+                        :description => "Active Merchant's Protx 3ds Gateway (IE/UK)"
+                      )
+
+GatewayOption.create(:name => 'login', :description => 'Your Protx Vendor Name (remember to set the server IP addresses in your VSP account)', :gateway_id => protx.id, :textarea => false)
+
+GatewayOption.create(:name => 'account', :description => 'Protx sub account name (optional)', :gateway_id => protx.id, :textarea => false)
+
+
+# setup protx / sagepay
+gc = GatewayConfiguration.create :gateway => Gateway.find_by_name("Protx3ds")
+gp = GatewayOptionValue.create :gateway_configuration => gc, 
+                               :gateway_option => GatewayOption.find_by_gateway_id_and_name(gc.gateway.id, "login"), 
+                               :value => File.read("which_vendor").chomp
+
+################################################################################
+# data setup
+
+# see http://techsupport.protx.com/cardtypes.asp#howcardtest for more numbers
+test_visa = "4929000000006"
+
+address = Address.create! "city"=>"a", "address1"=>"a", "address2"=>"a", "zipcode"=>"a", "country_id"=>213, "state_name"=>"CA", "lastname"=>"a", "id"=>109, "phone"=>"a", "firstname"=>"a", "state_id"=>1
+
+order = Order.new :ship_address => address
+order.generate_order_number
+order.save!
+
+card = Creditcard.new :number => test_visa, :cc_type => "visa", :verification_value => "123", :month => 3, :year => 2010, :address => address, :order => order
+card.use_3ds = true
+
+opts = { 
+       }
+
+
+# an authorization
+out = card.authorize(100, opts)
+
+callback = "https://foo.com/" + "orders/#{order.number}/callback_3dsecure?authenticity_token=#{12345}"
+form = out.call(callback, '<input type="submit" value="click_to_begin_3d_secure_verification">')
+
+puts form
+
+
+## try a purchase too... (later)
+
