@@ -42,21 +42,20 @@ module Spree
       txn.save
     end
 
-    def gateway_error(response)
-      text = response.params['message'] || 
-             response.params['response_reason_text'] ||
-             response.message
-      msg = "#{I18n.t('gateway_error')} ... #{text}"
-      logger.error(msg)
-      raise Spree::GatewayError.new(msg)
-    end
-    
+ #     def gateway_error(response)
+ #       text = response.params['message'] || 
+ #              response.params['response_reason_text'] ||
+ #              response.message
+ #       msg = "#{I18n.t('gateway_error')} ... #{text}"
+ #       logger.error(msg)
+ #       raise Spree::GatewayError.new(msg)
+ #     end
+ 
     # extended version, to allow passing extra options to AM    
     def gateway_options(options = {})
       addresses = {:billing_address  => generate_address_hash(address), 
                    :shipping_address => generate_address_hash(order.ship_address)}
-      addresses.merge minimal_gateway_options
-      addresses.merge options
+      addresses.merge(minimal_gateway_options).merge options
     end    
     
   end
