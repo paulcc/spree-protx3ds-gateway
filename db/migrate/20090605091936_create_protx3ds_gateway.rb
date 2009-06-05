@@ -1,7 +1,5 @@
-class CreateProtxGateway < ActiveRecord::Migration
+class CreateProtx3dsGateway < ActiveRecord::Migration
   def self.up
-    return if true    # migration order problems
-
     protx = Gateway.create(
       :clazz => 'ActiveMerchant::Billing::Protx3dsGateway',
       :name => 'Protx3ds',
