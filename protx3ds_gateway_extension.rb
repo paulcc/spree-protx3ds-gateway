@@ -14,6 +14,10 @@ class Protx3dsGatewayExtension < Spree::Extension
   
   def activate
 
+    require File.join(Protx3dsGatewayExtension.root, "lib", "active_merchant", "billing", "gateways", "protx.rb")
+    require File.join(Protx3dsGatewayExtension.root, "lib", "active_merchant", "billing", "gateways", "protx3ds.rb")
+
+
     # NOTE: monkey patch the extended gateway interface into place
     Creditcard.class_eval do
       # add gateway methods to the creditcard so we can authorize, capture, etc.
