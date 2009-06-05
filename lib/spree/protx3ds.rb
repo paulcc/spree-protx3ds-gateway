@@ -51,8 +51,7 @@ module Spree::Protx3ds
               @order.number = tmp_order_code	# save code used this time
               @order.save                       # and save what we have
               callback = request.protocol + request.host + "/orders/#{@order.number}/callback_3dsecure?authenticity_token=#{url_encode form_authenticity_token}"
-              form = result.call(callback, '<input type="submit" value="' + t("click_to_begin_3d_secure_verification") + '">') 
-              session["3Dform"] = '<div align="center">' + form + '</div>'
+              @form = result.call(callback, '<input type="submit" value="' + t("click_to_begin_3d_secure_verification") + '">') 
               render :action => '3dsecure_verification' and return
             end
           end
@@ -93,10 +92,6 @@ module Spree::Protx3ds
   # done via class_eval - have to?
   # ssl_required :show, :checkout, :complete_3dsecure, :callback_3dsecure, :secure_form
   # protect_from_forgery :except => :callback_3dsecure
-
-  #def secure_form
-  #  render :text => session["3Dform"], :layout => false
-  #end 
 
   def callback_3dsecure
     @callback = request.protocol + request.host + "/orders/#{params[:id]}/complete_3dsecure"
