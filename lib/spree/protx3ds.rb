@@ -26,8 +26,8 @@ module Spree::Protx3ds
     @order.shipments.build(:address => @order.ship_address, :shipping_method => @shipping_method) if @order.shipments.empty?    
 
     if request.post?                           
-      @order.creditcards.clear
-      @order.attributes = params[:order]  # duplic as above??
+      #@order.creditcards.clear
+      #@order.attributes = params[:order]  # duplic as above??
       @order.creditcards[0].address = @order.bill_address if @order.creditcards.present? # lu present
       @order.user = current_user       
       @order.ip_address = request.env['REMOTE_ADDR']
