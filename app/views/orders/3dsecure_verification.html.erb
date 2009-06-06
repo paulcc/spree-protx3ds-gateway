@@ -24,7 +24,7 @@ You have chosen to use a card that is part of the 3D-Secure scheme, so you will 
   </div>
 </div>
 
-<% content_for :head %>
+<% content_for :head do %>
   <script type="text/javascript">
   $('iframe#3ds').ready(function() {
     $('body', $('iframe#3ds').contents()).html($('#the_form').html());

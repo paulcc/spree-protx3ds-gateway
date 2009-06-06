@@ -14,6 +14,7 @@ class Protx3dsGatewayExtension < Spree::Extension
   
   def activate
 
+    # load two modified/updated files for active merchant
     require File.join(Protx3dsGatewayExtension.root, "lib", "active_merchant", "billing", "gateways", "protx.rb")
     require File.join(Protx3dsGatewayExtension.root, "lib", "active_merchant", "billing", "gateways", "protx3ds.rb")
 
@@ -26,6 +27,15 @@ class Protx3dsGatewayExtension < Spree::Extension
 
       # request that a card payment to use 3ds
       attr_accessor :use_3ds
+    end
+
+    # and use the modified checkout code
+    # NOTE: it's in its own module, to help work towards later use of multiple gateways
+    OrdersController.class_eval do 
+      include Spree::Protx3dsCheckout
+      ssl_required :complete_3dsecure, :callback_3dsecure
+      # TODO: work out why auth token is being rejected - faulty encoding??
+      protect_from_forgery :except => :callback_3dsecure
     end
 
     # NOTE: monkey patch until spree master catches up

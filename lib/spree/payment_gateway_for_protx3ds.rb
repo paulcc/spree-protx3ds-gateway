@@ -1,9 +1,10 @@
 module Spree
   module PaymentGatewayForProtx3ds
     # intended to supplement the existing PG
+    include Spree::PaymentGateway
 
     # transplanted from modified active merchant, should be unpicked later
-    def PaymentGateway.requires_3dsecure?(response)
+    def PaymentGatewayForProtx3ds.requires_3dsecure?(response)
       response.params["Status"] == "3DAUTH"
     end
 
@@ -18,7 +19,7 @@ module Spree
 
         order.new_payment(self, 0, amount, response.authorization, CreditcardTxn::TxnType::AUTHORIZE) 
 
-      elsif PaymentGateway.requires_3dsecure?(response)
+      elsif PaymentGatewayForProtx3ds.requires_3dsecure?(response)
         # save a transaction -- but without a response code
         # store the MD code instead to allow finding of txn later (TODO: abstract)
         transaction = order.new_payment(self, 0, amount, nil, CreditcardTxn::TxnType::AUTHORIZE) 
@@ -28,7 +29,6 @@ module Spree
       else
         gateway_error(response) 
       end
-
     end
 
     # doesn't require CC state - only depends on the parameters
