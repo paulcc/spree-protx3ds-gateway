@@ -2,15 +2,6 @@
 module Spree::Protx3dsCheckout
   include ERB::Util
 
-  # destination for gateway callbacks
-  def callback_host
-    if ActiveMerchant::Billing::Base.gateway_mode == :test
-      File.read("which_test_host").chomp 
-    else
-      request.host
-    end
-  end 
-
   def checkout
     build_object 
     load_object 
@@ -52,7 +43,8 @@ module Spree::Protx3dsCheckout
       @order.user = current_user       
       @order.email = current_user.email if @order.email.blank? && current_user
       @order.ip_address = request.env['REMOTE_ADDR']
-      @order.update_totals unless 
+      @order.update_totals 
+      @order.vtx_code = @order.number + "-0" if @order.vtx_code.nil?
 
       begin
         # need to check valid b/c we dump the creditcard info while saving
@@ -68,10 +60,8 @@ module Spree::Protx3dsCheckout
             @order.creditcards[0].order = @order
             @order.creditcards[0].valid? || raise(@order.creditcards[0].errors)
 
-            (@order.vtx_code ||= @order.number + '\x60').succ!
+            @order.vtx_code = @order.vtx_code.succ
             result = @order.creditcards[0].authorize(@order.total, :order_id => @order.vtx_code)
-
-
 
             if result.is_a?(CreditcardTxn) 
               @order.complete # implies save?
@@ -79,7 +69,9 @@ module Spree::Protx3dsCheckout
               session[:order_id] = nil 
             elsif result.is_a?(Proc)
               @order.save                       # and save what we have
-              callback = request.protocol + callback_host + "/orders/#{@order.number}/callback_3dsecure?authenticity_token=#{url_encode form_authenticity_token}"
+              callback = request.protocol + request.host_with_port + "/orders/#{@order.number}/callback_3dsecure?authenticity_token=#{url_encode form_authenticity_token}"
+    request.host_with_port
+
               @form = result.call(callback, '<input type="submit" value="' + t("click_to_begin_3d_secure_verification") + '">') 
               render :action => '3dsecure_verification' and return
             end
@@ -122,7 +114,7 @@ module Spree::Protx3dsCheckout
   ## 
 
   def callback_3dsecure
-    @callback = request.protocol + callback_host + "/orders/#{params[:id]}/complete_3dsecure"
+    @callback = request.protocol + request.host_with_port + "/orders/#{params[:id]}/complete_3dsecure"
     render :action => "callback_3dsecure", :layout => false
   end
 
