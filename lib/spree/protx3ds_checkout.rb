@@ -68,8 +68,8 @@ module Spree::Protx3dsCheckout
             @order.creditcards[0].order = @order
             @order.creditcards[0].valid? || raise(@order.creditcards[0].errors)
 
-            tmp_order_code = @order.number + '_' + Time.now.min.to_s + Time.now.sec.to_s
-            result = @order.creditcards[0].authorize(@order.total, :order_id => tmp_order_code)
+            (@order.vtx_code ||= @order.number + '\x60').succ!
+            result = @order.creditcards[0].authorize(@order.total, :order_id => @order.vtx_code)
 
 
 
@@ -78,7 +78,6 @@ module Spree::Protx3dsCheckout
               # remove the order from the session
               session[:order_id] = nil 
             elsif result.is_a?(Proc)
-              @order.number = tmp_order_code	# save code used this time
               @order.save                       # and save what we have
               callback = request.protocol + callback_host + "/orders/#{@order.number}/callback_3dsecure?authenticity_token=#{url_encode form_authenticity_token}"
               @form = result.call(callback, '<input type="submit" value="' + t("click_to_begin_3d_secure_verification") + '">') 
