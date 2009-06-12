@@ -22,8 +22,20 @@ module Spree
       elsif PaymentGatewayForProtx3ds.requires_3dsecure?(response)
         # save a transaction -- but without a response code
         # store the MD code instead to allow finding of txn later (TODO: abstract)
-        transaction = order.new_payment(self, 0, amount, nil, CreditcardTxn::TxnType::AUTHORIZE) 
-        transaction.md = response.params["MD"]
+        the_md = response.params["MD"]
+
+        # reuse a previous incomplete transaction structure
+        # ugly fudge here - TODO revisit when payment repres is simplified.
+        prev_trans = order.payments.last.txns.last unless order.payments.empty? || order.payments.last.txns.empty?
+        if prev_trans.nil? || ! prev_trans.response_code.blank?
+          transaction = order.new_payment(self, 0, amount, nil, CreditcardTxn::TxnType::AUTHORIZE) 
+        else 
+          transaction = prev_trans
+          prev_trans.creditcard_payment.amount = amount
+          prev_trans.creditcard_payment.creditcard = self
+          prev_trans.creditcard_payment.save
+        end 
+        transaction.md = the_md
         transaction.save
         gateway.form_for_3dsecure_verification(response.params)
       else
