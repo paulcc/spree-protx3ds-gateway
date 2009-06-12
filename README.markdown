@@ -22,12 +22,11 @@ NOTE: callback_3dsecure is exempt from protect_from_forgery - something is going
 
 = Configuration
 
-For testing purposes (ie gateway in test mode, connecting to the test server), the external name of 
-your test host - used in callback urls - is read from file +which_test_host+ 
-
-
 If you use my initializer code below, then you need to put your vendor name in the file +which_vendor+.
 This is the name that identifies your protx main account (not the sub-account).
+
+This mechanism is only done to hide the names of my test accounts, so you can to replace that File read with a string
+in your own sites etc
 
 
 
