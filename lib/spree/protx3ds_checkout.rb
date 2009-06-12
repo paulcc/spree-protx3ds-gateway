@@ -34,7 +34,7 @@ module Spree::Protx3dsCheckout
         params[:order][:bill_address_attributes][:id] = @order.bill_address.id 
       end
       if @order.ship_address && params[:order][:ship_address_attributes]
-        params[:order][:bill_address_attributes][:id] = @order.bill_address.id if @order.bill_address
+        params[:order][:ship_address_attributes][:id] = @order.ship_address.id 
       end
 
       tmp_cc_attributes = params[:order][:creditcards_attributes]["0"]
