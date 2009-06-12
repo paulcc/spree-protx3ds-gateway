@@ -73,7 +73,8 @@ module Spree::Protx3dsCheckout
     request.host_with_port
 
               @form = result.call(callback, '<input type="submit" value="' + t("click_to_begin_3d_secure_verification") + '">') 
-              render :action => '3dsecure_verification' and return
+              # can't use redirect (easily) here since we want to pass @form
+              render :action => 'enter_3dsecure' and return
             end
 
           end
