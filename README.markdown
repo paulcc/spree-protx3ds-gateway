@@ -61,3 +61,9 @@ else
                                  :value => File.read("which_vendor").chomp
 end
 @
+
+
+# Issues / TODO
+
+  1. Check handling of new Maestro type - AM doesn't handle it yet (and the regexps aren't up to date)
+
