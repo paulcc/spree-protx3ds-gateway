@@ -80,7 +80,9 @@ EOF
           parameters[:CV2] = "[hidden]"
           f.puts parameters.to_yaml
           f.puts "\n\n"
-          f.puts response.to_yaml
+          dummy = response.clone
+          dummy[:PAReq] = "[hidden]"
+          f.puts dummy.to_yaml
           f.puts "\n\n"
         end
 
