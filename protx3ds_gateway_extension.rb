@@ -18,7 +18,6 @@ class Protx3dsGatewayExtension < Spree::Extension
     require File.join(Protx3dsGatewayExtension.root, "lib", "active_merchant", "billing", "gateways", "protx.rb")
     require File.join(Protx3dsGatewayExtension.root, "lib", "active_merchant", "billing", "gateways", "protx3ds.rb")
 
-
     # NOTE: monkey patch the extended gateway interface into place
     Creditcard.class_eval do
       # add gateway methods to the creditcard so we can authorize, capture, etc.
@@ -29,10 +28,22 @@ class Protx3dsGatewayExtension < Spree::Extension
       attr_accessor :use_3ds
     end
 
-    # and use the modified checkout code
-    # NOTE: it's in its own module, to help work towards later use of multiple gateways
-    OrdersController.class_eval do 
-      include Spree::Protx3dsCheckout
+    # can't do auto captures here, since payment mech isn't necess simple - rethink
+    Spree::Config.set(:auto_capture => false)
+
+    Checkout.class_eval do
+      # can't do auto captures here, since payment mech isn't necess simple - rethink
+      # monkey-patched in directly, since there's an issue with including a private mthd via module ...
+      private
+      def authorize_creditcard
+        # not doing any card authorization
+      end
+    end
+
+    # add in the actions for the 3ds particulars
+    CheckoutsController.class_eval do 
+      # import the new operations
+      include Spree::Protx3dsController
       ssl_required :complete_3dsecure, :callback_3dsecure
       # TODO: work out why auth token is being rejected - faulty encoding??
       protect_from_forgery :except => :callback_3dsecure
@@ -40,6 +51,9 @@ class Protx3dsGatewayExtension < Spree::Extension
 
     # NOTE: monkey patch until spree master catches up
     Order.class_eval do 
+      # need this to allow updates later on
+      attr_protected :vtx_code
+
       # register a new creditcard payment sequence, returning the actual transaction added
       def new_payment(card, taken_amount, auth_amount, auth_code, txn_type)
         payment = creditcard_payments.create(:amount => taken_amount, :creditcard => card)

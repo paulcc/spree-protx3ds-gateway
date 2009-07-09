@@ -3,7 +3,7 @@ module ActiveMerchant #:nodoc:
     class ProtxGateway < Gateway  
       cattr_accessor :simulate
       self.simulate = false
-      
+
       TEST_URL = 'https://ukvpstest.protx.com/vspgateway/service'
       LIVE_URL = 'https://ukvps.protx.com/vspgateway/service'
       SIMULATOR_URL = 'https://ukvpstest.protx.com/VSPSimulator'

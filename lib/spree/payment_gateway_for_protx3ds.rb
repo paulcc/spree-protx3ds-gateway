@@ -17,7 +17,7 @@ module Spree
       if response.success?
         # create a creditcard_payment for the amount that was authorized
 
-        order.new_payment(self, 0, amount, response.authorization, CreditcardTxn::TxnType::AUTHORIZE) 
+        checkout.order.new_payment(self, 0, amount, response.authorization, CreditcardTxn::TxnType::AUTHORIZE) 
 
       elsif PaymentGatewayForProtx3ds.requires_3dsecure?(response)
         # save a transaction -- but without a response code
@@ -26,9 +26,9 @@ module Spree
 
         # reuse a previous incomplete transaction structure
         # ugly fudge here - TODO revisit when payment repres is simplified.
-        prev_trans = order.payments.last.txns.last unless order.payments.empty? || order.payments.last.txns.empty?
+        prev_trans = checkout.order.payments.last.txns.last unless checkout.order.payments.empty? || checkout.order.payments.last.txns.empty?
         if prev_trans.nil? || ! prev_trans.response_code.blank?
-          transaction = order.new_payment(self, 0, amount, nil, CreditcardTxn::TxnType::AUTHORIZE) 
+          transaction = checkout.order.new_payment(self, 0, amount, nil, CreditcardTxn::TxnType::AUTHORIZE) 
         else 
           transaction = prev_trans
           prev_trans.creditcard_payment.amount = amount
@@ -45,7 +45,7 @@ module Spree
 
     # doesn't require CC state - only depends on the parameters
     def complete_3dsecure(params)
-      params["VendorTxCode"] = order.vtx_code
+      params["VendorTxCode"] = checkout.order.vtx_code
       response = payment_gateway.complete_3dsecure(params)
       gateway_error(response) unless response.success?          
 
@@ -57,7 +57,7 @@ module Spree
     # extended version, to allow passing extra options to AM    
     def gateway_options(options = {})
       addresses = {:billing_address  => generate_address_hash(address), 
-                   :shipping_address => generate_address_hash(order.ship_address)}
+                   :shipping_address => generate_address_hash(checkout.ship_address)}
       addresses.merge(minimal_gateway_options).merge options
     end    
     

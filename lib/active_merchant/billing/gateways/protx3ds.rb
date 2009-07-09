@@ -81,7 +81,7 @@ EOF
           f.puts parameters.to_yaml
           f.puts "\n\n"
           dummy = response.clone
-          dummy[:PAReq] = "[hidden]"
+          dummy["PAReq"] = "[hidden]"
           f.puts dummy.to_yaml
           f.puts "\n\n"
         end
