@@ -29,7 +29,9 @@ class Protx3dsGatewayExtension < Spree::Extension
     end
 
     # can't do auto captures here, since payment mech isn't necess simple - rethink
-    Spree::Config.set(:auto_capture => false)
+    unless Spree::Config[].nil?
+      Spree::Config.set(:auto_capture => false)
+    end
 
     Checkout.class_eval do
       # can't do auto captures here, since payment mech isn't necess simple - rethink
