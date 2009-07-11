@@ -42,11 +42,9 @@ class CheckoutsController < Spree::BaseController
           elsif result.is_a?(Proc)
             @order.save                       # and save what we have
 
-            # callback = request.protocol + request.host_with_port + "/orders/#{order.number}/checkout/callback_3dsecure?authenticity_token=#{url_encode form_authenticity_token}"
-            callback = callback_3dsecure_order_checkout_url(@order) + "?authenticity_token=#{form_authenticity_token}" ## try
-            # puts "AAAAAAAAAAAAA #{callback}"
+            callback = callback_3dsecure_order_checkout_url(@order, :protocol => 'https') + "?authenticity_token=#{form_authenticity_token}" 
     
-            @form = result.call(callback, '<input type="submit" value="' + t("click_to_begin_3d_secure_verification") + '">') 
+            @form = result.call(callback, "<input type='submit' value='#{t 'click_to_begin_3d_secure_verification'}'/>")
             # can't use redirect (easily) here since we want to pass @form
             render :action => 'enter_3dsecure' and return
           end
