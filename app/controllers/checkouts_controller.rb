@@ -7,6 +7,8 @@ class CheckoutsController < Spree::BaseController
   
   layout 'application'   
 
+  ssl_required :update, :edit
+
   # alias original r_c method so we can handle special gateway exception that might be thrown
   alias :rc_update :update
   def update 
