@@ -4,8 +4,8 @@ module Spree
     ## 
   
     def callback_3dsecure
-      @callback = request.protocol + request.host_with_port + "/orders/#{params[:id]}/checkouts/complete_3dsecure"
-      @callback = complete_3dsecure_order_checkout_url(Order.find_by_number params[:order_id])
+      @callback = complete_3dsecure_order_checkout_url(Order.find_by_number(params[:order_id]), 
+                                                       :protocol => 'https')
       render :action => "callback_3dsecure", :layout => false
     end
   
@@ -36,8 +36,9 @@ module Spree
           }
         end
       rescue Spree::GatewayError => ge
-        flash.now[:error] = t("unable_to_authorize_credit_card") + ": #{ge.message}"
-        render :action => "checkout" and return 
+        flash[:error] = t("unable_to_authorize_credit_card") + ": #{ge.message}"
+        redirect_to edit_object_url and return
+
       end
     end
   end

@@ -46,7 +46,7 @@ class Protx3dsGatewayExtension < Spree::Extension
     CheckoutsController.class_eval do 
       # import the new operations
       include Spree::Protx3dsController
-      ssl_required :complete_3dsecure, :callback_3dsecure
+      ssl_required :enter_3dsecure, :complete_3dsecure, :callback_3dsecure
       # TODO: work out why auth token is being rejected - faulty encoding??
       protect_from_forgery :except => :callback_3dsecure
     end
