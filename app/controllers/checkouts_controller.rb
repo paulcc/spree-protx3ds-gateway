@@ -6,7 +6,6 @@ class CheckoutsController < Spree::BaseController
   belongs_to :order             
   
   layout 'application'   
-
   ssl_required :update, :edit
 
   # alias original r_c method so we can handle special gateway exception that might be thrown
@@ -69,17 +68,18 @@ class CheckoutsController < Spree::BaseController
     success.wants.js do   
       @order.reload
       render :json => { :order_total => number_to_currency(@order.total),
-                        :charges => charge_hash,
+                        :charges => charge_hash,  
+                        :credits => credit_hash,
                         :available_methods => rate_hash}.to_json,
              :layout => false
     end
   end
   
   update.before do
-    if params[:checkout]
+    if params[:checkout] 
       # prevent double creation of addresses if user is jumping back to address stup without refreshing page
-      params[:checkout][:bill_address_attributes][:id] = @checkout.bill_address.id if @checkout.bill_address
-      params[:checkout][:ship_address_attributes][:id] = @checkout.ship_address.id if @checkout.ship_address
+      params[:checkout][:bill_address_attributes][:id] = @checkout.bill_address.id if params[:checkout][:bill_address_attributes] and @checkout.bill_address
+      params[:checkout][:ship_address_attributes][:id] = @checkout.ship_address.id if params[:checkout][:ship_address_attributes] and @checkout.ship_address
     end
     @checkout.ip_address ||= request.env['REMOTE_ADDR']
     @checkout.email = current_user.email if current_user && @checkout.email.blank?
@@ -91,9 +91,12 @@ class CheckoutsController < Spree::BaseController
     return @object if @object
     default_country = Country.find Spree::Config[:default_country_id]
     @object = parent_object.checkout                                                  
-    @object.ship_address ||= Address.new(:country => default_country)
-    @object.bill_address ||= Address.new(:country => default_country)   
-    @object.creditcard   ||= Creditcard.new(:month => Date.today.month, :year => Date.today.year)
+    unless params[:checkout] and params[:checkout][:coupon_code]
+      # do not create these defaults if we're merely updating coupon code, otherwise we'll have a validation error
+      @object.ship_address ||= Address.new(:country => default_country)
+      @object.bill_address ||= Address.new(:country => default_country)   
+      @object.creditcard   ||= Creditcard.new(:month => Date.today.month, :year => Date.today.year)
+    end
     @object         
   end
   
@@ -115,5 +118,9 @@ class CheckoutsController < Spree::BaseController
   
   def charge_hash
     Hash[*@order.charges.collect { |c| [c.description, number_to_currency(c.amount)] }.flatten]    
-  end  
+  end           
+  
+  def credit_hash
+    Hash[*@order.credits.collect { |c| [c.description, number_to_currency(c.amount)] }.flatten]    
+  end
 end
