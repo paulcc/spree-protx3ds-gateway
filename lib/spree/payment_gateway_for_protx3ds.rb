@@ -57,7 +57,7 @@ module Spree
     # extended version, to allow passing extra options to AM    
     def gateway_options(options = {})
       addresses = {:billing_address  => generate_address_hash(address), 
-                   :shipping_address => generate_address_hash(checkout.ship_address)}
+                   :shipping_address => generate_address_hash(checkout.shipment.address)}
       addresses.merge(minimal_gateway_options).merge options
     end    
     
