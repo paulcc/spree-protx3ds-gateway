@@ -45,9 +45,9 @@ class Protx3dsGatewayExtension < Spree::Extension
     # add in the actions for the 3ds particulars
     CheckoutsController.class_eval do 
       # import the new operations
+      include Spree::UpdateMethod
       include Spree::Protx3dsController
       ssl_required :enter_3dsecure, :complete_3dsecure, :callback_3dsecure
-      # TODO: work out why auth token is being rejected - faulty encoding??
       protect_from_forgery :except => :callback_3dsecure
     end
 

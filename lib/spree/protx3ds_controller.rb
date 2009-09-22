@@ -23,22 +23,32 @@ module Spree
 
           # expect gateway to throw a wobbly if it can't proceed?
           order.complete
-
         end
         respond_to do |format|
           format.html {
-            # copied verbatim from checkout.update code - can share??
-            flash[:notice] = t('order_processed_successfully')
-            order_params = {:checkout_complete => true}
-            order_params[:order_token] = order.token unless order.user
-            session[:order_id] = nil if order.checkout.completed_at
-            redirect_to order_url(order, order_params) and next ## ?? if params[:final_answer]
+            if order.checkout_complete
+              if current_user
+                current_user.update_attribute(:bill_address, order.bill_address)
+                current_user.update_attribute(:ship_address, order.ship_address)
+              end
+              flash[:notice] = t('order_processed_successfully')
+              order_params = {:checkout_complete => true}
+              order_params[:order_token] = order.token unless order.user
+              session[:order_id] = nil
+              redirect_to order_url(order, order_params) and next
+            else
+              # this means a failed filter which should have thrown an exception
+              flash[:notice] = "Unexpected error condition -- please contact site support"
+              redirect_to edit_object_url and next
+            end
           }
         end
       rescue Spree::GatewayError => ge
         flash[:error] = t("unable_to_authorize_credit_card") + ": #{ge.message}"
         redirect_to edit_object_url and return
-
+      rescue Exception => oe
+        flash[:error] = t("unable_to_authorize_credit_card") + ": #{oe.message}"
+        redirect_to edit_object_url and return
       end
     end
   end
